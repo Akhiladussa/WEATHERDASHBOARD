@@ -1,278 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
-    <style>
-        /* Custom styles for the dynamic background */
-        #dynamic-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -1;
-        }
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.6;
-            background: rgba(255, 255, 255, 0.084); /* Default particle color */
-        }
-    </style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Animated Weather Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+background:linear-gradient(135deg,#0f172a,#1e293b);
+overflow:hidden;
+}
+
+.weather-bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:-1;
+}
+
+/* sun */
+
+.sun{
+width:120px;
+height:120px;
+background:radial-gradient(circle,#FFD93D,#FFA500);
+border-radius:50%;
+position:absolute;
+top:80px;
+right:100px;
+animation:spin 20s linear infinite;
+box-shadow:0 0 60px #FFD93D;
+}
+
+@keyframes spin{
+0%{transform:rotate(0)}
+100%{transform:rotate(360deg)}
+}
+
+/* moon */
+
+.moon{
+width:100px;
+height:100px;
+background:#ddd;
+border-radius:50%;
+position:absolute;
+top:80px;
+right:100px;
+box-shadow:0 0 30px #fff;
+}
+
+/* stars */
+
+.star{
+width:3px;
+height:3px;
+background:white;
+position:absolute;
+border-radius:50%;
+animation:twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle{
+from{opacity:0.2}
+to{opacity:1}
+}
+
+/* rain */
+
+.rain{
+position:absolute;
+width:2px;
+height:15px;
+background:#8ecae6;
+animation:rain 0.7s linear infinite;
+}
+
+@keyframes rain{
+0%{
+transform:translateY(-100px);
+opacity:1;
+}
+
+100%{
+transform:translateY(600px);
+opacity:0;
+}
+}
+
+.glass{
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+</style>
+
 </head>
-<body class="bg-gray-900 font-roboto text-white">
-    <div id="dynamic-bg"></div> <div class="container mx-auto p-4 md:p-6 lg:p-8">
-        <h1 class="text-3xl md:text-4xl lg:text-5xl font-semibold text-center mb-6 md:mb-8 lg:mb-10 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
-            Weather Dashboard
-        </h1>
-        <div class="bg-gray-800 rounded-lg shadow-lg p-4 md:p-6 lg:p-8 mb-6 md:mb-8 lg:mb-10">
-            <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 lg:gap-8">
-                <input
-                    type="text"
-                    id="location-input"
-                    placeholder="Enter location..."
-                    class="w-full md:w-auto px-4 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
-                />
-                <button id="search-button" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md shadow-md transition duration-300 font-mono">
-                    Search
-                </button>
-            </div>
-        </div>
-        <div id="weather-report" class="bg-gray-800 rounded-lg shadow-lg p-4 md:p-6 lg:p-8 hidden">
-            <div class="text-center mb-4 md:mb-6 lg:mb-8">
-                <h2 id="location-name" class="text-2xl md:text-3xl lg:text-4xl font-semibold text-white">--</h2>
-                <p id="date-time" class="text-gray-300 text-sm md:text-base lg:text-lg"></p>
-            </div>
-            <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 lg:gap-10 mb-6 md:mb-8 lg:mb-10">
-                <div id="temperature-container" class="flex items-center gap-4">
-                    <img id="weather-icon" src="" alt="Weather Icon" class="w-16 md:w-20 lg:w-24">
-                    <p id="temperature" class="text-4xl md:text-5xl lg:text-6xl font-bold text-white">--°C</p>
-                </div>
-                <div id="weather-description" class="text-xl md:text-2xl lg:text-3xl text-gray-200">--</div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-                <div>
-                    <div class="bg-gray-700 rounded-md p-3 md:p-4 lg:p-5">
-                        <h3 class="text-lg md:text-xl lg:text-2xl font-semibold text-gray-300 mb-2">Humidity</h3>
-                        <p id="humidity" class="text-xl md:text-2xl lg:text-3xl text-white">--%</p>
-                    </div>
-                </div>
-                <div>
-                    <div class="bg-gray-700 rounded-md p-3 md:p-4 lg:p-5">
-                        <h3 class="text-lg md:text-xl lg:text-2xl font-semibold text-gray-300 mb-2">Wind Speed</h3>
-                        <p id="wind-speed" class="text-xl md:text-2xl lg:text-3xl text-white">-- m/s</p>
-                    </div>
-                </div>
-                <div>
-                    <div class="bg-gray-700 rounded-md p-3 md:p-4 lg:p-5">
-                        <h3 class="text-lg md:text-xl lg:text-2xl font-semibold text-gray-300 mb-2">Pressure</h3>
-                        <p id="pressure" class="text-xl md:text-2xl lg:text-3xl text-white">-- hPa</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <script>
-        // Get references to HTML elements
-        const locationInput = document.getElementById('location-input');
-        const searchButton = document.getElementById('search-button');
-        const weatherReport = document.getElementById('weather-report');
-        const locationName = document.getElementById('location-name');
-        const dateTimeDisplay = document.getElementById('date-time');
-        const temperatureDisplay = document.getElementById('temperature');
-        const weatherIcon = document.getElementById('weather-icon');
-        const weatherDescription = document.getElementById('weather-description');
-        const humidityDisplay = document.getElementById('humidity');
-        const windSpeedDisplay = document.getElementById('wind-speed');
-        const pressureDisplay = document.getElementById('pressure');
-        const dynamicBackground = document.getElementById('dynamic-bg');
+<body class="text-white flex items-center justify-center min-h-screen p-6">
 
-        // Weather API Key
-        const apiKey = 'aa90fbd820c9ef57c4834975db0d8441'; 
+<div id="bg" class="weather-bg"></div>
 
-        // Function to fetch weather data from OpenWeatherMap API
-        async function getWeatherData(location) {
-            try {
-                const response = await fetch(
-                    `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`
-                );
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Error fetching weather data:', error);
-                // Handle error (e.g., display a message to the user)
-                return null;
-            }
-        }
+<div class="glass rounded-xl shadow-xl p-6 w-full max-w-xl">
 
-        // Function to update the UI with weather data
-        function updateUI(weatherData) {
-            if (!weatherData) {
-                // Handle the case where no data was received (e.g., due to an error)
-                locationName.textContent = 'Location Not Found';
-                dateTimeDisplay.textContent = '';
-                temperatureDisplay.textContent = '--°C';
-                weatherIcon.src = '';
-                weatherDescription.textContent = '--';
-                humidityDisplay.textContent = '--%';
-                windSpeedDisplay.textContent = '-- m/s';
-                pressureDisplay.textContent = '-- hPa';
-                weatherReport.classList.add('hidden');
-                return;
-            }
+<h1 class="text-3xl font-bold mb-6 text-center">
+Weather Dashboard
+</h1>
 
-            const { name, main, weather, wind, sys } = weatherData;
+<div class="flex gap-3 mb-6">
 
-            // Update location name and date/time
-            locationName.textContent = name;
-            const now = new Date();
-            const dateTimeString = now.toLocaleString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-            });
-            dateTimeDisplay.textContent = dateTimeString;
+<input
+id="city"
+type="text"
+placeholder="Enter city..."
+class="flex-1 p-3 rounded-lg bg-gray-800 outline-none"
+/>
 
-            // Update temperature and weather icon
-            const temperature = Math.round(main.temp);
-            temperatureDisplay.textContent = `${temperature}°C`;
-            const iconCode = weather[0].icon;
-            const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
-            weatherIcon.src = iconUrl;
-            weatherIcon.alt = weather[0].description;
-            weatherDescription.textContent = weather[0].description;
+<button
+onclick="getWeather()"
+class="bg-blue-500 px-5 rounded-lg hover:bg-blue-600"
+>
+Search
+</button>
 
-            // Update humidity, wind speed, and pressure
-            humidityDisplay.textContent = `${main.humidity}%`;
-            windSpeedDisplay.textContent = `${wind.speed} m/s`;
-            pressureDisplay.textContent = `${main.pressure} hPa`;
+</div>
 
-            // Show the weather report section
-            weatherReport.classList.remove('hidden');
+<div id="weatherCard" class="hidden text-center">
 
-            // Set dynamic background based on weather conditions
-            setDynamicBackground(weather[0].main, temperature);
-        }
+<h2 id="cityName" class="text-2xl font-semibold"></h2>
 
-        // Function to set dynamic background based on weather conditions
-        function setDynamicBackground(condition, temperature) {
-            dynamicBackground.innerHTML = ''; // Clear previous particles
+<img id="icon" class="mx-auto w-20">
 
-            let baseColor = 'rgba(255, 255, 255, 0.2)'; // Default particle color
-            let particleCount = 200; // Default particle count
-            let animationDuration = 2000; // Default animation duration
-            let sizeFactor = 1;
+<h1 id="temp" class="text-5xl font-bold"></h1>
 
-            switch (condition) {
-                case 'Clear':
-                    baseColor = 'rgba(255, 255, 255, 0.2)'; // Faint white for clear
-                    particleCount = 100;
-                    animationDuration = 3000;
-                    sizeFactor = 0.8;
-                    if (temperature > 30) {
-                         baseColor = 'rgba(255, 204, 102, 0.2)'; // Light orange for hot
-                    }
-                    break;
-                case 'Clouds':
-                    baseColor = 'rgba(192, 192, 192, 0.3)'; // Gray for clouds
-                    particleCount = 150;
-                    animationDuration = 2500;
-                    sizeFactor = 1;
-                    break;
-                case 'Rain':
-                case 'Drizzle':
-                    baseColor = 'rgba(0, 149, 237, 0.4)'; // Blue for rain
-                    particleCount = 250;
-                    animationDuration = 1500;
-                    sizeFactor = 1.2;
-                    break;
-                case 'Snow':
-                    baseColor = 'rgba(255, 255, 255, 0.5)'; // White for snow
-                    particleCount = 300;
-                    animationDuration = 2000;
-                    sizeFactor = 1;
-                    break;
-                case 'Thunderstorm':
-                    baseColor = 'rgba(255, 255, 0, 0.4)'; // Yellow for lightning
-                    particleCount = 100;
-                    animationDuration = 1000;
-                    sizeFactor = 1.5;
-                    break;
-                case 'Mist':
-                case 'Fog':
-                    baseColor = 'rgba(192, 192, 192, 0.2)'; // Light gray
-                    particleCount = 200;
-                    animationDuration = 2500;
-                    sizeFactor = 1;
-                    break;
-                default:
-                    baseColor = 'rgba(255, 255, 255, 0.2)'; // Default
-                    particleCount = 150;
-                    animationDuration = 3000;
-                    sizeFactor = 1;
-            }
+<p id="description" class="capitalize"></p>
 
-            // Create particles
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.backgroundColor = baseColor;
-                const x = Math.random() * 100;
-                const y = Math.random() * 100;
-                const size = (Math.random() * 8 + 2) * sizeFactor; // Adjust size
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = `${x}vw`;
-                particle.style.top = `${y}vh`;
-                dynamicBackground.appendChild(particle);
+<p class="mt-4">Humidity: <span id="humidity"></span>%</p>
 
-                // Animate particles
-                anime({
-                    targets: particle,
-                    translateY: ['0vh', '100vh'],
-                    translateX: [`${x}vw`, `${x + (Math.random() - 0.5) * 20}vw`],
-                    duration: animationDuration,
-                    easing: 'linear',
-                    loop: true,
-                    delay: i * 100,
-                });
-            }
-        }
+<p>Wind: <span id="wind"></span> m/s</p>
 
-        // Event listener for the search button
-        searchButton.addEventListener('click', async () => {
-            const location = locationInput.value.trim();
-            if (location) {
-                const weatherData = await getWeatherData(location);
-                updateUI(weatherData);
-            } else {
-                alert('Please enter a location.');
-            }
-            locationInput.value = ''; // Clear input after search
-        });
+<p class="mt-3">Season: <span id="season"></span></p>
 
-        // Event listener for Enter key press in the input field
-        locationInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                searchButton.click();
-            }
-        });
+<ul id="suggestions" class="mt-4"></ul>
 
-        // Initial background animation on page load
-        setDynamicBackground('Clear', 20); // Default background.
-    </script>
+</div>
+
+</div>
+
+<script>
+
+const apiKey="aa90fbd820c9ef57c4834975db0d8441";
+
+async function getWeather(){
+
+const city=document.getElementById("city").value;
+
+const res=await fetch(
+`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
+);
+
+const data=await res.json();
+
+updateUI(data);
+
+}
+
+function updateUI(data){
+
+document.getElementById("weatherCard").classList.remove("hidden");
+
+document.getElementById("cityName").innerText=data.name;
+
+document.getElementById("temp").innerText=Math.round(data.main.temp)+"°C";
+
+document.getElementById("description").innerText=data.weather[0].description;
+
+document.getElementById("humidity").innerText=data.main.humidity;
+
+document.getElementById("wind").innerText=data.wind.speed;
+
+document.getElementById("icon").src=
+`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+
+const season=getSeason(data.main.temp);
+
+document.getElementById("season").innerText=season;
+
+generateSuggestions(data.main.temp,data.weather[0].main);
+
+updateBackground(data.weather[0].main);
+
+}
+
+function getSeason(temp){
+
+if(temp>32) return "Summer";
+if(temp>20) return "Spring";
+if(temp>10) return "Autumn";
+return "Winter";
+
+}
+
+function generateSuggestions(temp,condition){
+
+const list=document.getElementById("suggestions");
+
+list.innerHTML="";
+
+let tips=[];
+
+if(condition==="Rain") tips.push("Carry umbrella ☔");
+
+if(temp>35) tips.push("Stay hydrated 💧");
+
+if(temp<12) tips.push("Wear warm clothes 🧥");
+
+if(condition==="Clear") tips.push("Great day outside ☀️");
+
+tips.forEach(t=>{
+let li=document.createElement("li");
+li.innerText=t;
+list.appendChild(li);
+});
+
+}
+
+function updateBackground(condition){
+
+const bg=document.getElementById("bg");
+
+bg.innerHTML="";
+
+const hour=new Date().getHours();
+
+if(hour>=6 && hour<=18){
+
+const sun=document.createElement("div");
+sun.className="sun";
+bg.appendChild(sun);
+
+}else{
+
+const moon=document.createElement("div");
+moon.className="moon";
+bg.appendChild(moon);
+
+for(let i=0;i<80;i++){
+
+const star=document.createElement("div");
+
+star.className="star";
+
+star.style.left=Math.random()*100+"%";
+
+star.style.top=Math.random()*100+"%";
+
+bg.appendChild(star);
+
+}
+
+}
+
+if(condition==="Rain"){
+
+for(let i=0;i<100;i++){
+
+const drop=document.createElement("div");
+
+drop.className="rain";
+
+drop.style.left=Math.random()*100+"%";
+
+drop.style.animationDelay=Math.random()+"s";
+
+bg.appendChild(drop);
+
+}
+
+}
+
+}
+
+</script>
+
 </body>
+
 </html>
